@@ -1,4 +1,4 @@
-package com.akaalistudios.minesweeper
+package com.akaalistudios.minesweeper // the main activity for showing the first screen
 
 import android.app.AlertDialog
 import android.content.Context
@@ -25,15 +25,15 @@ class MainActivity : AppCompatActivity() {
         val activity_main_radioGroup = findViewById<RadioGroup>(R.id.activity_main_radioGroup)
         val help = findViewById<ImageView>(R.id.help_icon)
         val share = findViewById<ImageView>(R.id.share_icon)
-
-
         val activity_main_make_custom_board = findViewById<Button>(R.id.activity_main_make_custom_board)
-        activity_main_enter_rows = findViewById<EditText>(R.id.activity_main_enter_rows)
-        activity_main_enter_columns = findViewById<EditText>(R.id.activity_main_enter_columns)
-        activity_main_enter_mines = findViewById<EditText>(R.id.activity_main_enter_mines)
+        activity_main_enter_rows = findViewById(R.id.activity_main_enter_rows)
+        activity_main_enter_columns = findViewById(R.id.activity_main_enter_columns)
+        activity_main_enter_mines = findViewById(R.id.activity_main_enter_mines)
         val activity_main_start = findViewById<Button>(R.id.activity_main_start)
 
+
         activity_main_make_custom_board.setOnClickListener {
+            //clears the checks in the radio group and makes the edit texts visible
             activity_main_radioGroup.clearCheck()
             activity_main_enter_rows.visibility = View.VISIBLE
             activity_main_enter_columns.visibility = View.VISIBLE
@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         activity_main_radioGroup.setOnCheckedChangeListener { group, checkedId ->
+            //makes the edit texts invisible and turns the radio buttons
             activity_main_enter_rows.visibility = View.INVISIBLE
             activity_main_enter_columns.visibility = View.INVISIBLE
             activity_main_enter_mines.visibility = View.INVISIBLE
@@ -54,7 +55,9 @@ class MainActivity : AppCompatActivity() {
         activity_main_start.setOnClickListener {
             startGame(difficulty)
         }
+
         help.setOnClickListener {
+            //shows the instructions of the game
             val builder: AlertDialog.Builder = AlertDialog.Builder(this)
             builder.setTitle("INSTRUCTIONS")
             builder.setMessage("Minesweeper for Android lets you play the classic logic game where you have to use your wit to clean mines from Gameboard." +
@@ -67,6 +70,7 @@ class MainActivity : AppCompatActivity() {
             alertDialog.show()
         }
         share.setOnClickListener {
+            //shares the high scores of the game
             val activity_main_best_time = findViewById<TextView>(R.id.activity_main_best_time)
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
@@ -80,14 +84,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadData() {
-        val sharedPref: SharedPreferences = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        //this methods handles the highscore and last win time of the players using shared preferences
+        val sharedPref: SharedPreferences = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)//gets the high score and last win time from BoardActivity
         val lastTime = sharedPref.getString("lastTime", "00:00").toString()
         val bestTime = sharedPref.getString("bestTime", "00:00").toString()
         val activity_main_best_time = findViewById<TextView>(R.id.activity_main_best_time)
         val activity_main_last_game_time = findViewById<TextView>(R.id.activity_main_last_game_time)
         activity_main_last_game_time.text = lastTime
         activity_main_best_time.text = bestTime
-        val sharedPref2: SharedPreferences = getSharedPreferences("sharedPref2", Context.MODE_PRIVATE)
+        val sharedPref2: SharedPreferences = getSharedPreferences("sharedPref2", Context.MODE_PRIVATE)//sends the initial highscore to the BoardActivity and compares them
         val editor = sharedPref2.edit().apply {
             putString("highscore", bestTime)
 
@@ -96,17 +101,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun startGame(difficulty: String?) {
         if (difficulty == " ") {
+            //checking if the entries are empty
             if (TextUtils.isEmpty(activity_main_enter_rows.text.toString()) || TextUtils.isEmpty(activity_main_enter_columns.text.toString()) || TextUtils.isEmpty(activity_main_enter_mines.text.toString())) {
                 Toast.makeText(this, "Fields cannot be empty.", Toast.LENGTH_LONG).show()
             } else {
                 val rows = activity_main_enter_rows.text.toString().toInt()
                 val columns = activity_main_enter_columns.text.toString().toInt()
                 val mines = activity_main_enter_mines.text.toString().toInt()
-
+                //declaring all the constraints of the game
                 if (rows > 25 || columns > 25 || rows < 5 || columns < 5) {
-                    Toast.makeText(this, "The number of rows and columns should be greater than 4 and less than 25", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "The number of rows and columns should be more than 4 and less than 25", Toast.LENGTH_SHORT).show()
                 } else if (mines < 3) {
-                    Toast.makeText(this, "The number of mines should be greater than 2", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "The number of mines should be more than 2", Toast.LENGTH_SHORT).show()
                 } else if (mines > (rows * columns / 4)) {
                     Toast.makeText(this, "The number of mines should be less to avoid overcrowding", Toast.LENGTH_SHORT).show()
                 } else {

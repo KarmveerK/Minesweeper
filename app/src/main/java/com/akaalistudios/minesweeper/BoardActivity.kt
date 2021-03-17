@@ -1,4 +1,4 @@
-package com.akaalistudios.minesweeper
+package com.akaalistudios.minesweeper //this activity sets the board for the game.
 
 import android.R.attr
 import android.app.AlertDialog
@@ -31,7 +31,7 @@ class BoardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_board)
-
+        //getting the mode of difficulty chosen by the user ie. custom or not
         val intent = intent
         val mode = intent.getIntExtra("mode", 0)
         when(mode){
@@ -52,7 +52,7 @@ class BoardActivity : AppCompatActivity() {
                 setUpBoard(rows, columns, mines)
             }
         }
-        activity_board_restart = findViewById<ImageView>(R.id.activity_board_restart)
+        activity_board_restart = findViewById(R.id.activity_board_restart)
         activity_board_restart.setImageResource(R.drawable.smile)
         activity_board_restart.setOnClickListener{
             gameRestart()
@@ -60,6 +60,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun gameRestart() {
+        //this function simply restarts the activity
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
 
         builder.setMessage("Are you sure you want to restart the game?")
@@ -83,7 +84,7 @@ class BoardActivity : AppCompatActivity() {
         activity_board_mines.text = mines.toString()
 
         val board = findViewById<LinearLayout>(R.id.board)
-        //array containing mice cells
+        //array containing mine cells
         val cellBoard = Array(rows) { Array(columns) { MineCell(this) } }
 
         //parameters of linear layout
@@ -97,7 +98,7 @@ class BoardActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT
         )
 
-        var counter = 1
+        var counter = 1 //will be useful to identify the cells
         var isFirstClick = true
 
         for (i in 0 until rows) {
@@ -125,7 +126,7 @@ class BoardActivity : AppCompatActivity() {
                     move(choice, i, j, cellBoard, rows, columns, mines)
                     display(cellBoard)
                 }
-
+                //long click to mark and remove flags
                 button.setOnLongClickListener{
                     choice = 2
                     move(choice, i, j, cellBoard, rows, columns, mines)
@@ -147,6 +148,7 @@ class BoardActivity : AppCompatActivity() {
                     setNumberImage(it)
                 else if (it.isMarked)
                     it.setBackgroundResource(R.drawable.flag)
+                //shows bomb after game lost
                 else if (status == Status.LOST && it.value == MINE) {
                     it.setBackgroundResource(R.drawable.bomb)
                 }
@@ -154,9 +156,11 @@ class BoardActivity : AppCompatActivity() {
                 if(status == Status.LOST && it.isMarked && !it.isMine){
                     it.setBackgroundResource(R.drawable.crossedflag)
                 }
+                //displays flag in cell
                 else if (status == Status.WON && it.value == MINE) {
                     it.setBackgroundResource(R.drawable.flag)
                 }
+                //to set the bezel image to sad emoji
                 else if(status == Status.LOST){
                     activity_board_restart.setImageResource(R.drawable.sad)
                     it.isEnabled = false
@@ -172,9 +176,10 @@ class BoardActivity : AppCompatActivity() {
         val mineCount:Int= mines
         var i:Int = 1
         while (i<=mineCount){
+            //generates random numbers in the given range
             var r = (Random(System.nanoTime()).nextInt(0, rows))
             var c = (Random(System.nanoTime()).nextInt(0, columns))
-            if (c==j ||cellBoard[r][c].isMine){
+            if (c==j ||cellBoard[r][c].isMine){ //c represents column and checks if the cell to be marked is not the same as mine for the first click
                 continue
             }
             cellBoard[r][c].isMine = true
@@ -186,6 +191,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun updateNeighbours(r: Int, c: Int, cellBoard: Array<Array<MineCell>>, rows: Int, columns: Int) {
+        //generates numbers for the neighbouring cells after a mine is generated
         for (i in movement) {
             for (j in movement) {
                 if(((r+i) in 0 until rows) && ((c+j) in 0 until columns) && cellBoard[r + i][c + j].value != MINE)
@@ -236,10 +242,10 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun isValid(x:Int, y:Int,rowSize: Int,colSize: Int):Boolean{
-        return ((x>=0)&&(x<=rowSize-1))&&((y>=0)&&(y<=colSize-1))
+        return ((x>=0)&&(x<=rowSize-1))&&((y>=0)&&(y<=colSize-1))//checks if the move is valid or not
     }
 
-    private fun moveRecursion(x: Int, y: Int, cellBoard: Array<Array<MineCell>>, rowSize: Int, colSize: Int) {
+    private fun moveRecursion(x: Int, y: Int, cellBoard: Array<Array<MineCell>>, rowSize: Int, colSize: Int) {//recursive function to start a move and to update the tiles
         if(isValid(x,y,rowSize,colSize) && !cellBoard[x][y].isMarked && !cellBoard[x][y].isRevealed){
             cellBoard[x][y].isRevealed = true
             if (cellBoard[x][y].value == 0){
@@ -277,24 +283,25 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun gameLost() {
-        //activity_board_restart.setImageResource(R.drawable.sad)
         Toast.makeText(this,"GAME LOST! \nRestart and try again!",Toast.LENGTH_LONG).show()
         val mp : MediaPlayer = MediaPlayer.create(this, R.raw.defeat)
         mp.start()
     }
 
     private fun startTimer() {
+        //starts the chronometer
         chronometer = findViewById<Chronometer>(R.id.timer)
         chronometer.start()
     }
 
     private fun updateScore() {
+        //called after the status check to update high score
         chronometer.stop()
         if(status == Status.WON){
             val time = (chronometer.text).toString()
 
 
-            val sharedPref2 :SharedPreferences = getSharedPreferences("sharedPref2",Context.MODE_PRIVATE)
+            val sharedPref2 :SharedPreferences = getSharedPreferences("sharedPref2",Context.MODE_PRIVATE)//getting the initial value of highscore
             val highscore = sharedPref2.getString("highscore","00:00")
             if (highscore != null) {
                 bestTime = highscore
@@ -318,7 +325,7 @@ class BoardActivity : AppCompatActivity() {
                 else{
                     putString("bestTime",bestTime)
                 }
-                Log.d("score","$bestTime    $lastTime")
+                //Log.d("score","$bestTime    $lastTime")
             }.apply()
             gameWon()
         }
